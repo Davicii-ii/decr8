@@ -72,6 +72,8 @@ STAGE1, STAGE2, STAGE3, STAGE4 = range(4)
 
 global text
 global count
+global val
+global key
 
 app = Client("decr8_g-host", api_id=api_id, api_hash=api_hash)
         
@@ -153,7 +155,7 @@ def deep_linked_level_2(update: Update, context: CallbackContext) -> None:
         USING_ENTITIES
     )
 
-    text = " ""[▶️ CLICK HERE]({}).".format(url)
+    text = " ""[▶️ STOP BOT]({}).".format(url)
     update.message.reply_text(
         text,
         parse_mode=ParseMode.MARKDOWN,
@@ -164,7 +166,7 @@ def deep_linked_level_3(update: Update, context: CallbackContext) -> None:
     """Reached through the USING_ENTITIES payload"""
     payload = context.args
     update.message.reply_text(
-        "/next",
+        "/queue",
         parse_mode=ParseMode.MARKDOWN
     )
 
@@ -363,45 +365,21 @@ def button(update: Update, context: CallbackContext) -> None:
     
 def inlinequery(update: Update, context: CallbackContext) -> None:
     """Handle the inline query."""
-    
+
     query = update.inline_query.query
+    results = []
 
-    try:
-        results = [
-            InlineQueryResultAudio(
-                id=uuid4(),
-                audio_url="{}{}".format(dcr8_url, random.choice(val)),
-                title="{}".format(key),
-                parse_mode=ParseMode.MARKDOWN
-            ),
-            
-            InlineQueryResultArticle(
-                id=uuid4(),
-                title="{}".format(key),
-                input_message_content=InputTextMessageContent(query)
-            ),
-            
-            InlineQueryResultArticle(
-                id=uuid4(),
-                title="Bold",
-                input_message_content=InputTextMessageContent(
-                    f"*{escape_markdown(query)}*", parse_mode=ParseMode.MARKDOWN
+    for k, v in d.items():
+        if re.search(query, k, re.IGNORECASE):
+            results.append(
+                InlineQueryResultAudio(
+                    id=uuid4(),
+                    audio_url="{}{}".format(dcr8_url, v),
+                    title="{}".format(k)
                 ),
-            ),
-            
-            InlineQueryResultArticle(
-                id=uuid4(),
-                title="Italic",
-                input_message_content=InputTextMessageContent(
-                    f"_{escape_markdown(query)}_", parse_mode=ParseMode.MARKDOWN
-                ),
-            ),
-        ]
-    except BadRequest as e:
-        update.message.reply_text(e)
+            )
         
-    update.inline_query.answer(results)
-
+    update.inline_query.answer(results, auto_pagination=True)
 
 def stage1(update: Update, context: CallbackContext) -> int:
 

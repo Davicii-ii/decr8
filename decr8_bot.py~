@@ -155,7 +155,7 @@ def deep_linked_level_2(update: Update, context: CallbackContext) -> None:
         USING_ENTITIES
     )
 
-    text = " ""[▶️ CLICK HERE]({}).".format(url)
+    text = " ""[▶️ STOP BOT]({}).".format(url)
     update.message.reply_text(
         text,
         parse_mode=ParseMode.MARKDOWN,
@@ -166,7 +166,7 @@ def deep_linked_level_3(update: Update, context: CallbackContext) -> None:
     """Reached through the USING_ENTITIES payload"""
     payload = context.args
     update.message.reply_text(
-        "/next",
+        "/queue",
         parse_mode=ParseMode.MARKDOWN
     )
 
@@ -365,33 +365,21 @@ def button(update: Update, context: CallbackContext) -> None:
     
 def inlinequery(update: Update, context: CallbackContext) -> None:
     """Handle the inline query."""
-    global key
-    global val
-
-    key = [
-        k
-        for k, v in d.items()
-        # if re.search(query, k, re.IGNORECASE)
-        ]
-
-    val = [
-        v
-        for k, v in d.items()
-        ]
 
     query = update.inline_query.query
+    results = []
 
-    results = [
-        InlineQueryResultAudio(
-            id=uuid4(),
-            audio_url="{}{}".format(dcr8_url, random.choice(val)),
-            title="{}".format(key)
-            parse_mode=ParseMode.MARKDOWN
-        ),
-    ]
-    
-    update.inline_query.answer(results)
-
+    for k, v in d.items():
+        if re.search(query, k, re.IGNORECASE):
+            results.append(
+                InlineQueryResultAudio(
+                    id=uuid4(),
+                    audio_url="{}{}".format(dcr8_url, v),
+                    title="{}".format(k)
+                ),
+            )
+        
+    update.inline_query.answer(results, auto_pagination=True)
 
 def stage1(update: Update, context: CallbackContext) -> int:
 
@@ -447,7 +435,7 @@ def main():
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
     updater = Updater(
-        "1266125805:AAFnUPiqc0LiHPWJNlOp2XhfSGsqtu_cEbA", use_context=True
+        "1575933473:AAE-pseOycvK1OU32k1P2xVAH0Lwx_Ikjmg", use_context=True
     )
     
     # Get the dispatcher to register handlers
