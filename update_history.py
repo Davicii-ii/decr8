@@ -26,7 +26,7 @@ with Client("history_update", api_id, api_hash) as app:
     }
     logging.info("Done.")
     with open(
-            "/home/ayuko/decr8/res/decr8_data.json",
+            "/home/decr8/decr8/res/decr8_data.json",
             "w",
             encoding="utf-8"
     ) as f:
