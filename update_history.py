@@ -19,8 +19,8 @@ decr8 = -1001280481543
 with Client("history_update", api_id, api_hash) as app:
     logging.info("Getting history.")
     d = {
-        msg.audio.file_name: msg.message_id
-        for msg in (app.iter_history(decr8))
+        msg.audio.file_name: msg.id
+        for msg in (app.get_chat_history(decr8))
         if msg.audio
         if not None
     }
