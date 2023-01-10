@@ -1,0 +1,22 @@
+import os
+
+FILE_LIST = []
+
+def get_local_folder(folder_path):
+    if os.path.exists(folder_path) and os.path.isdir(folder_path):
+        return folder_path
+    else:
+        return None
+
+def get_files_in_folder(folder):
+    for item in os.listdir(folder):
+        item_path = os.path.join(folder, item)
+        if os.path.isfile(item_path):
+            FILE_LIST.append(item_path)
+        elif os.path.isdir(item_path):
+            get_files_in_folder(item_path)
+
+folder = get_local_folder("/home/decr8/music")
+if folder is not None:
+    get_files_in_folder(folder)
+print(len(FILE_LIST))
