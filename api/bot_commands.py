@@ -27,7 +27,9 @@ def start(update: Update, context: CallbackContext) -> None:
 
     COUNT = 0
     
-    reply_keyboard = [['/start'],['/queue'],['/help']]
+    reply_keyboard = [
+        ['/start'],['/queue', "/scdl"],['/help']
+    ]
     
     """Send a deep-linked URL when the command /start is issued."""
     bot = context.bot
@@ -134,9 +136,9 @@ def queue(update: Update, context: CallbackContext) -> None:
                 break
 
 def run_update(update: Update, context: CallbackContext):
-    command = "python3 decr8_pyrobot.py"
+    command = "python3 update_history.py"
     result = os.popen(command).read()  # Run the command and get the output
-    update.message.reply_text("Update complete.")
+    update.message.reply_text(result)
 
 def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""

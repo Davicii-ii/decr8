@@ -13,6 +13,7 @@ api_id = 314504
 api_hash = "8c64c308e6f0186d495ae1e92a1c228d"
 
 decr8 = -1001280481543
+decr8loader = 1575933473
 me = 487795386
 p = re.compile("[a-z]+", re.IGNORECASE)
 dcr8_url = "https://t.me/crateofnotsodasbutmusic/"

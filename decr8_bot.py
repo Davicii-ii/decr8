@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 
-import random, os, sys, re, json, api
+import os, sys, json, api
 
 from uuid import uuid4
 
+from api.bot_scdl import *
 from api.variables import *
 from api.deep_link import *
 from api.bot_commands import *
 from api.bot_non_commands import *
 from api.bot_error import *
 
-from telegram.utils import (
-    helpers
-    )
+#from telegram.utils import (
+#    helpers
+#    )
 
 def main():
     

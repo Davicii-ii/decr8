@@ -61,30 +61,30 @@ def search(update: Update, context: CallbackContext) -> None:
 
     COUNT = 0
 
-    text = (
-        "👺\nResult {} of {}\n ""[{}]({})\n".format(
-            KEY.index(KEY[COUNT]),
-            len(KEY),
-            KEY[COUNT],
-            dcr8_url+"{}".format(VAL[COUNT])
-            )
-    )
-    
-    update.message.reply_text(
-        text,
-        reply_markup=reply_markup,
-        parse_mode=ParseMode.MARKDOWN
-    )    
-    
-    """
-    update.message.reply_audio(
-    "{}{}".format(url, i),
-    reply_markup=reply_markup,
-    parse_mode=ParseMode.MARKDOWN
-    )
-"""
+    link = re.search(r"(t\.me\/[a-zA-Z0-9_]{5,32})", update.message.text)
 
-def button(update: Update, context: CallbackContext) -> None:
+    try:
+        text = (
+            "👺\nResult {} of {}\n ""[{}]({})\n".format(
+                KEY.index(KEY[COUNT]),
+                len(KEY),
+                KEY[COUNT],
+                dcr8_url+"{}".format(VAL[COUNT])
+            )
+        )
+
+        update.message.reply_text(
+            text,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.MARKDOWN
+        )
+    except (BadRequest, IndexError) as e:
+        if link:
+            update.message.reply_text("use this bot to download songs: \nt.me/decr8test_bot")
+        else:
+            update.message.reply_text("Not found.")
+        
+def search_buttons(update: Update, context: CallbackContext) -> None:
     global KEY
     global VAL
     global COUNT
@@ -142,7 +142,7 @@ def button(update: Update, context: CallbackContext) -> None:
                 parse_mode=ParseMode.MARKDOWN
             )
     except(IndexError, BadRequest):
-        pass
+        update.message.reply_text("Not Found.")
     
 def inlinequery(update: Update, context: CallbackContext) -> None:
     """Handle the inline query."""
@@ -161,3 +161,4 @@ def inlinequery(update: Update, context: CallbackContext) -> None:
             )
         
     update.inline_query.answer(results, auto_pagination=True)
+
