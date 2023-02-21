@@ -28,7 +28,7 @@ def start(update: Update, context: CallbackContext) -> None:
     COUNT = 0
     
     reply_keyboard = [
-        ['/start'],['/queue', "/scdl"],['/help']
+        ["/start"],["/queue", "/queue_mix"], ["/scdl"], ["/help"]
     ]
     
     """Send a deep-linked URL when the command /start is issued."""
@@ -58,7 +58,7 @@ def add(update: Update, context: CallbackContext) -> None:
     global COUNT
     
     reply_keyboard = [
-        ["/queue"],
+        ["/queue", "/queue_mix"],
         ["/sub", "/add"]
     ]
 
@@ -75,7 +75,7 @@ def sub(update: Update, context: CallbackContext) -> None:
     global COUNT
 
     reply_keyboard = [
-        ["/queue"],
+        ["/queue", "/queue_mix"],
         ["/sub", "/add"]
     ]
     help_keyboard = [
@@ -96,51 +96,76 @@ def sub(update: Update, context: CallbackContext) -> None:
             parse_mode=ParseMode.MARKDOWN
         )
 
-
 def queue(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /next is issued."""
 
     global COUNT
-    
     if COUNT < 1:
         COUNT = 1
+        
+    msg_id = []
 
-    attempts = 0
-    max_attempts = 3
+    for k, v in data.items():
+        msg_id.append(k)
 
     for i in range(COUNT):
-        try:
-            for i in range(COUNT):
-                url = "https://t.me/crateofnotsodasbutmusic/{}".format(
-                    random.choice(list(data.values())))
-                
-                reply_keyboard = [
-                    ["/sub", "/add"],
-                    ["/queue"],
-                    ["/start"]
-                ]
-                
-                update.message.reply_audio(
-                    "{}".format(url),
-                    parse_mode=ParseMode.MARKDOWN,
-                    reply_markup=ReplyKeyboardMarkup(
-                        reply_keyboard,
-                        one_time_keyboard=True
-                    )
-                )
-               
-                break
-        except (BadRequest) as e:
-            attempts += 1
-            if attempts >= max_attempts:
-                break
+        url = "https://t.me/crateofnotsodasbutmusic/{}".format(
+            random.choice(msg_id))
+        
+        reply_keyboard = [
+            ["/sub", "/add"],
+            ["/queue", "/queue_mix"],
+            ["/start"]
+        ]
+        
+        update.message.reply_audio(
+            "{}".format(url),
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=ReplyKeyboardMarkup(
+                reply_keyboard,
+                one_time_keyboard=True
+            )
+        )
 
+
+def queue_mix(update: Update, context: CallbackContext) -> None:
+    """Send a message when the command /next is issued."""
+
+    global COUNT
+    if COUNT < 1:
+        COUNT = 1
+        
+    msg_id = []
+
+    for k, v in data.items():
+        if v.get("duration") > 666:
+            msg_id.append(k)
+            
+        for i in range(COUNT):
+            url = "https://t.me/crateofnotsodasbutmusic/{}".format(
+                random.choice(msg_id))
+            
+            reply_keyboard = [
+                ["/sub", "/add"],
+                ["/queue", "/queue_mix"],
+                ["/start"]
+            ]
+            
+            update.message.reply_audio(
+                "{}".format(url),
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=ReplyKeyboardMarkup(
+                    reply_keyboard,
+                    one_time_keyboard=True
+                )
+            )
+    
 def run_update(update: Update, context: CallbackContext):
     command = "python3 update_history.py"
     result = os.popen(command).read()  # Run the command and get the output
     update.message.reply_text(result)
-
+    
 def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
     update.message.reply_text("/next Add to playlist.")
-    
+

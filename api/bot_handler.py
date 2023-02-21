@@ -61,6 +61,7 @@ conv_handler = ConversationHandler(
 # on different commands - answer in Telegram
 dp.add_handler(CommandHandler("start", start))
 dp.add_handler(CommandHandler("queue", queue))
+dp.add_handler(CommandHandler("queue_mix", queue_mix))
 dp.add_handler(CommandHandler("add", add))
 dp.add_handler(CommandHandler("sub", sub))
 dp.add_handler(CommandHandler("scdl", scdl_command))

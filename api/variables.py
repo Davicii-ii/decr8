@@ -18,11 +18,6 @@ me = 487795386
 p = re.compile("[a-z]+", re.IGNORECASE)
 dcr8_url = "https://t.me/crateofnotsodasbutmusic/"
 
-TEXT = ""
-VAL = 0
-KEY = ""
-COUNT = int()
-
 # deep-linking parameters.
 DECR8 = 'decr8'
 USING_ENTITIES = 'using-entities-here'

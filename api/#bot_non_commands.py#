@@ -34,39 +34,76 @@ def search(update: Update, context: CallbackContext) -> None:
     global COUNT
 
     msg_id, filename, title, performer = [], [], [], []
-
-    try:
-        for k, v in data.items():
-            if re.search(
-                    update.message.text,
-                    v.get('filename'),
-                    re.IGNORECASE):
-                msg_id.append(k)
-                filename.append(v.get('filename'))
-                title.append(v.get('title'))
-                performer.append(v.get('performer'))
-    except AttributeError as e:
-        e
-
-    keyboard = [
-        [
-            InlineKeyboardButton(
-                "<",
-                callback_data="1"
-            ),
-            
-            InlineKeyboardButton(
-                ">",
-                callback_data="2"
-            ),
+    def search(update: Update, context: CallbackContext) -> None:
+        """Search the user's message and return a markup with the top 10 results."""
+        global KEY
+        global VAL
+        
+        VAL = [
+            v
+            for k, v in data.items()
+            if re.search(update.message.text, k, re.IGNORECASE)
+        ][:10]  # Only store the top 10 matching values
+        
+        KEY = [
+            k
+            for k, v in data.items()
+            if re.search(update.message.text, k, re.IGNORECASE)
+        ][:10]  # Only store the top 10 matching keys
+        
+        keyboard = [
+            [
+                InlineKeyboardButton(
+                    str(i + 1),
+                    callback_data=str(i)
+                ),
+                InlineKeyboardButton(
+                    KEY[i],
+                    callback_data=str(i)
+                ),
+                InlineKeyboardButton(
+                    "🔗",
+                    url=dcr8_url+VAL[i]
+                )
+            ]
+            for i in range(len(KEY))
         ]
-    ]
-    
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    COUNT = 0
-
-    link = re.search(r"(t\.me\/[a-zA-Z0-9_]{5,32})", update.message.text)
+        
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        update.message.reply_text("Here are the top 10 results:", reply_markup=reply_markup)
+        try:
+            for k, v in data.items():
+                if re.search(
+                        update.message.text,
+                        v.get('filename'),
+                        re.IGNORECASE):
+                    msg_id.append(k)
+                    filename.append(v.get('filename'))
+                    title.append(v.get('title'))
+                    performer.append(v.get('performer'))
+        except AttributeError as e:
+            e
+            
+            keyboard = [
+                [
+                    InlineKeyboardButton(
+                        "<",
+                        callback_data="1"
+                    ),
+                    
+                    InlineKeyboardButton(
+                        ">",
+                        callback_data="2"
+                    ),
+                ]
+            ]
+            
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            COUNT = 0
+            
+            link = re.search(r"(t\.me\/[a-zA-Z0-9_]{5,32})", update.message.text)
 
     try:
         text = (
