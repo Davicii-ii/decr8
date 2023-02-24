@@ -2,28 +2,34 @@ from api.imports import *
 from api.variables import *
 from api.bot_error import *
 
-page_size = 10
-
-# Set the current page number
-page_number = 1
-
-# Calculate the start and end indices for the current page
-start_index = (page_number - 1) * page_size
-end_index = start_index + page_size
-
 def search(update: Update, context: CallbackContext) -> list[tuple]:
     """Search the user's message.""" 
-    msg_id, filename, title, performer = [], [], [], []
+
+    global filename, msg_id, link_list, page_number, page_size, start_index, end_index
+
+    page_size = 10
+
+    # Set the current page number
+    page_number = 1
+    
+    # Calculate the start and end indices for the current page
+    start_index = (page_number - 1) * page_size
+    end_index = start_index + page_size
+
+    link_list, msg_id, filename, title, performer = [], [], [], [], []
     try:
         for k, v in data.items():
             if re.search(
                     update.message.text,
                     v.get('filename'),
-                    re.IGNORECASE):
+                    re.IGNORECASE
+            ):
+                
                 msg_id.append(k)
                 filename.append(v.get('filename'))
                 title.append(v.get('title'))
                 performer.append(v.get('performer'))
+
     except AttributeError as e:
         e
         
@@ -44,10 +50,17 @@ def search(update: Update, context: CallbackContext) -> list[tuple]:
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     COUNT = 0
-
     link = re.search(r"(t\.me\/[a-zA-Z0-9_]{5,32})", update.message.text)
+
+    for i in range(len(filename)):
+        link_str = "[{}]({})".format(
+            filename[i],
+            dcr8_url+"{}".format(msg_id[i])
+        )
+        link_list.append(link_str)
+
     # Slice the list to get the items for the current page
-    current_page = filename[start_index:end_index]
+    current_page = link_list[start_index:end_index]
 
     try:
         for i in range(page_size):
@@ -55,12 +68,10 @@ def search(update: Update, context: CallbackContext) -> list[tuple]:
                 page_number,
                 page_size,
                 len(filename),
-                current_page
-            )
-            link_str = "[{}]({})\n\n".format(
-                filename[i],
-                dcr8_url+"{}".format(msg_id[i])
-            )
+                "{}\n".join(current_page)
+                )
+            text += link_str
+            
         update.message.reply_text(
             text,
             reply_markup=reply_markup,
@@ -68,13 +79,17 @@ def search(update: Update, context: CallbackContext) -> list[tuple]:
         )
     except (BadRequest, IndexError, AttributeError) as e:
         if link:
-            update.message.reply_text("use this bot to download songs: \nt.me/decr8test_bot")
+            update.message.reply_text(
+                "use this bot to download songs: \nt.me/decr8test_bot"
+            )
         else:
-            update.message.reply_text("Not found.")        
+            update.message.reply_text("Not found.\n\n{}".format(e))        
 
     return msg_id, performer, title, filename
 
 def search_buttons(update: Update, context: CallbackContext) -> None:
+
+    global filename, msg_id, link_list, page_number, page_size, start_index, end_index
     
     query = update.callback_query
     
@@ -88,17 +103,20 @@ def search_buttons(update: Update, context: CallbackContext) -> None:
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    COUNT = 1
-    if query.data == '1':
-        COUNT -= 1
+
+    if query.data == "1":
+        page_number -= 1
+        start_index = (page_number - 1) * page_size
+        end_index = start_index + page_size
+        prev_page = link_list[start_index:end_index]
+
         for i in range(page_size):
-            text = "{} of {}\n".format(msg_id.index(msg_id[i]), len(filename))
-            link_str = ["[{}]({})\n\n".format(
-                filename[i],
-                dcr8_url+"{}".format(msg_id[i])
-            )]
-            text += link_str
-            
+            text = "{} - {} of {}\n{}".format(
+                page_number,
+                page_size,
+                len(filename),
+                prev_page
+            )
         query.edit_message_text(
             text,
             reply_markup=reply_markup,
@@ -106,24 +124,19 @@ def search_buttons(update: Update, context: CallbackContext) -> None:
         )
         
     elif query.data == '2':
-        COUNT += 1
-        # Calculate the start and end indices for the next page
-        next_page_start = end_index
-        next_page_end = next_page_start + page_size        
-        # Slice the list to get the next 5 items
-        next_page = filename[next_page_start:next_page_end]
+        page_number += 1
+        start_index = (page_number - 1) * page_size
+        end_index = start_index + page_size
+        next_page = link_list[start_index:end_index]
 
         for i in range(page_size):
-            text = "{} of {}\n{}".format(
-                msg_id.index(msg_id[i]),
+            text = "{} - {} of {}\n{}".format(
+                page_number,
+                page_size,
                 len(filename),
-                next_page
+                "\n".join(next_page)
             )
-            link_str = "[{}]({})\n\n".format(
-                filename[i],
-                dcr8_url+"{}".format(msg_id[i])
-            )
-            text += link_str
+            # text += link_str
             
         query.edit_message_text(
             text,
