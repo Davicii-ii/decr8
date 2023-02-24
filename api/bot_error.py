@@ -1,9 +1,5 @@
-from telegram import Update, ParseMode 
-from telegram.ext import CallbackContext
-from telegram.error import TelegramError, BadRequest
+from api.imports import *
 from api.variables import * 
-
-import random, os, re, json, traceback, html
 
 def error_handler(update: Update, context: CallbackContext) -> None:
     """Log the error and send a telegram message to notify the developer."""

@@ -1,14 +1,4 @@
-from telegram.ext import (
-    Updater,
-    InlineQueryHandler,
-    CommandHandler,
-    ConversationHandler,
-    CallbackQueryHandler,
-    MessageHandler,
-    Filters,
-    CallbackContext,
-)
-
+from api.imports import *
 from api.variables import *
 from api.deep_link import *
 from api.bot_commands import *

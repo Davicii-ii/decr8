@@ -1,5 +1,4 @@
-from telegram import Update
-from telegram.ext import CallbackContext
+from api import imports
 from api.variables import *
 
 import api

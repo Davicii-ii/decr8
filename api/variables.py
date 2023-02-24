@@ -1,7 +1,5 @@
-import logging, re, json
-
 from pyrogram import Client
-from telegram.ext import Updater
+from api.imports import *
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO

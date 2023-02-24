@@ -1,31 +1,15 @@
-from telegram import (
-    Update,
-    InlineQueryResultAudio,
-    InlineQueryResultArticle,
-    InputTextMessageContent,
-    ParseMode,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    InputTextMessageContent,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-)
-
-from telegram.ext import CallbackContext
-
+from api.imports import *
 from api.variables import *
 from api.bot_error import *
 
-from telegram.utils import (
-    helpers
-    )
+COUNT = 0
 
 def start(update: Update, context: CallbackContext) -> None:
     """Start bot"""
 
     global COUNT
-
-    COUNT = 0
+    
+    COUNT = 1
     
     reply_keyboard = [
         ["/start"],["/queue", "/queue_mix"], ["/scdl"], ["/help"]
@@ -82,7 +66,7 @@ def sub(update: Update, context: CallbackContext) -> None:
         ["/add"]
     ]
 
-    if COUNT <= 1:
+    if COUNT < 1:
         update.message.reply_text(
             "queue cant be < {}. /add instead".format(COUNT),
             reply_markup=ReplyKeyboardMarkup(help_keyboard),
@@ -100,9 +84,7 @@ def queue(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /next is issued."""
 
     global COUNT
-    if COUNT < 1:
-        COUNT = 1
-        
+         
     msg_id = []
 
     for k, v in data.items():
@@ -126,31 +108,28 @@ def queue(update: Update, context: CallbackContext) -> None:
                 one_time_keyboard=True
             )
         )
-
-
+        
 def queue_mix(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /next is issued."""
-
+    
     global COUNT
-    if COUNT < 1:
-        COUNT = 1
         
     msg_id = []
 
     for k, v in data.items():
-        if v.get("duration") > 666:
+        if v.get("duration") > 600 and v.get("duration") < 18000:
             msg_id.append(k)
-            
-        for i in range(COUNT):
-            url = "https://t.me/crateofnotsodasbutmusic/{}".format(
-                random.choice(msg_id))
-            
-            reply_keyboard = [
-                ["/sub", "/add"],
-                ["/queue", "/queue_mix"],
-                ["/start"]
-            ]
-            
+
+    for i in range(COUNT):
+        url = "https://t.me/crateofnotsodasbutmusic/{}".format(
+            random.choice(msg_id))
+        
+        reply_keyboard = [
+            ["/sub", "/add"],
+            ["/queue", "/queue_mix"],
+            ["/start"]
+        ]
+        try:
             update.message.reply_audio(
                 "{}".format(url),
                 parse_mode=ParseMode.MARKDOWN,
@@ -159,7 +138,9 @@ def queue_mix(update: Update, context: CallbackContext) -> None:
                     one_time_keyboard=True
                 )
             )
-    
+        except BadRequest as e:
+            continue
+        
 def run_update(update: Update, context: CallbackContext):
     command = "python3 update_history.py"
     result = os.popen(command).read()  # Run the command and get the output

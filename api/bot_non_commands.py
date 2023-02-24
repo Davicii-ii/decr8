@@ -1,40 +1,19 @@
-from telegram import (
-    Update,
-    InlineQueryResultAudio,
-    InlineQueryResultArticle,
-    InputTextMessageContent,
-    ParseMode,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    InputTextMessageContent,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-)
-from telegram.ext import (
-    Updater,
-    InlineQueryHandler,
-    CommandHandler,
-    ConversationHandler,
-    CallbackQueryHandler,
-    MessageHandler,
-    Filters,
-    CallbackContext,
-)
-
+from api.imports import *
 from api.variables import *
 from api.bot_error import *
 
-from uuid import uuid4
+page_size = 10
 
-def search(update: Update, context: CallbackContext) -> None:
+# Set the current page number
+page_number = 1
+
+# Calculate the start and end indices for the current page
+start_index = (page_number - 1) * page_size
+end_index = start_index + page_size
+
+def search(update: Update, context: CallbackContext) -> list[tuple]:
     """Search the user's message.""" 
-
-    global msg_id
-    global filename, title, performer
-    global COUNT
-
     msg_id, filename, title, performer = [], [], [], []
-
     try:
         for k, v in data.items():
             if re.search(
@@ -47,7 +26,7 @@ def search(update: Update, context: CallbackContext) -> None:
                 performer.append(v.get('performer'))
     except AttributeError as e:
         e
-
+        
     keyboard = [
         [
             InlineKeyboardButton(
@@ -67,95 +46,93 @@ def search(update: Update, context: CallbackContext) -> None:
     COUNT = 0
 
     link = re.search(r"(t\.me\/[a-zA-Z0-9_]{5,32})", update.message.text)
+    # Slice the list to get the items for the current page
+    current_page = filename[start_index:end_index]
 
     try:
-        text = (
-            "👺\nResult {} of {}\n ""[{}]({})\n".format(
-                msg_id.index(msg_id[COUNT]),
-                len(msg_id),
-                filename[COUNT].strip('0123456789.mp3') and filename[COUNT].replace('_', ' '),
-                dcr8_url+"{}".format(msg_id[COUNT]),
+        for i in range(page_size):
+            text = "{} - {} of {}\n{}".format(
+                page_number,
+                page_size,
+                len(filename),
+                current_page
             )
-        )
-
+            link_str = "[{}]({})\n\n".format(
+                filename[i],
+                dcr8_url+"{}".format(msg_id[i])
+            )
         update.message.reply_text(
             text,
             reply_markup=reply_markup,
             parse_mode=ParseMode.MARKDOWN
         )
-    except (BadRequest, IndexError) as e:
+    except (BadRequest, IndexError, AttributeError) as e:
         if link:
             update.message.reply_text("use this bot to download songs: \nt.me/decr8test_bot")
         else:
             update.message.reply_text("Not found.")        
-    return msg_id, performer, title, filename
-        
-def search_buttons(update: Update, context: CallbackContext) -> None:
 
-    global COUNT
-    global msg_id
-    global title
-    global performer
-    global filename
+    return msg_id, performer, title, filename
+
+def search_buttons(update: Update, context: CallbackContext) -> None:
     
     query = update.callback_query
     
     # CallbackQueries need to be answered, even if no notification to the user is needed
     # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
-    query.answer(text="🤖")
-
+    query.answer(text="🤖")    
     keyboard = [
         [
-            InlineKeyboardButton(
-                "<",
-                callback_data="1"
-            ),
-            
-            InlineKeyboardButton(
-                ">",
-                callback_data="2"
-            ),
+            InlineKeyboardButton("<", callback_data="1"),
+            InlineKeyboardButton(">", callback_data="2")
         ]
     ]
-    
     reply_markup = InlineKeyboardMarkup(keyboard)
-
-    try:
-        if query.data == '1':
-            COUNT -= 1
-            text = "👺\nResult {} of {}\n ""[{}]({})\n".format(
-                msg_id.index(msg_id[COUNT]),
-                len(msg_id),
-                filename[COUNT].strip("0123456789.mp3"),
-                dcr8_url+"{}".format(msg_id[COUNT])
-            )
-
-            query.edit_message_text(
-                text,
-                reply_markup=reply_markup,
-                parse_mode=ParseMode.MARKDOWN
-            )
+    COUNT = 1
+    if query.data == '1':
+        COUNT -= 1
+        for i in range(page_size):
+            text = "{} of {}\n".format(msg_id.index(msg_id[i]), len(filename))
+            link_str = ["[{}]({})\n\n".format(
+                filename[i],
+                dcr8_url+"{}".format(msg_id[i])
+            )]
+            text += link_str
+            
+        query.edit_message_text(
+            text,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.MARKDOWN
+        )
         
-        elif query.data == '2':
-            COUNT += 1
-            text = "👺\nResult {} of {}\n ""[{}]({})\n".format(
-                msg_id.index(msg_id[COUNT]),
-                len(msg_id),
-                filename[COUNT].strip("0123456789.mp3"),
-                dcr8_url+"{}".format(msg_id[COUNT])
-            )
+    elif query.data == '2':
+        COUNT += 1
+        # Calculate the start and end indices for the next page
+        next_page_start = end_index
+        next_page_end = next_page_start + page_size        
+        # Slice the list to get the next 5 items
+        next_page = filename[next_page_start:next_page_end]
 
-            query.edit_message_text(
-                text,
-                reply_markup=reply_markup,
-                parse_mode=ParseMode.MARKDOWN
+        for i in range(page_size):
+            text = "{} of {}\n{}".format(
+                msg_id.index(msg_id[i]),
+                len(filename),
+                next_page
             )
-    except(IndexError, BadRequest):
-        update.message.reply_text("Not Found.")
-    
+            link_str = "[{}]({})\n\n".format(
+                filename[i],
+                dcr8_url+"{}".format(msg_id[i])
+            )
+            text += link_str
+            
+        query.edit_message_text(
+            text,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.MARKDOWN
+        )
+            
 def inlinequery(update: Update, context: CallbackContext) -> None:
     """Handle the inline query."""
-
     query = update.inline_query.query
     results = []
 
