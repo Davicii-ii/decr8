@@ -3,7 +3,6 @@ from api.variables import *
 from api.deep_link import *
 from api.bot_commands import *
 from api.bot_non_commands import *
-from api.bot_scdl import *
 from api.bot_error import *
 
 # Register a deep-linking handler
@@ -54,7 +53,6 @@ dp.add_handler(CommandHandler("queue", queue))
 dp.add_handler(CommandHandler("queue_mix", queue_mix))
 dp.add_handler(CommandHandler("add", add))
 dp.add_handler(CommandHandler("sub", sub))
-dp.add_handler(CommandHandler("scdl", scdl_command))
 dp.add_handler(CommandHandler("update", run_update))
 
 dp.add_handler(CommandHandler("help", help_command))

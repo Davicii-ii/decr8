@@ -12,7 +12,9 @@ def start(update: Update, context: CallbackContext) -> None:
     COUNT = 1
     
     reply_keyboard = [
-        ["/start"],["/queue", "/queue_mix"], ["/scdl"], ["/help"]
+        ["/start"],
+        ["/queue", "/queue_mix"],
+        ["/help"]
     ]
     
     """Send a deep-linked URL when the command /start is issued."""

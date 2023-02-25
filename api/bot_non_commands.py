@@ -61,14 +61,14 @@ def search(update: Update, context: CallbackContext) -> list[tuple]:
 
     # Slice the list to get the items for the current page
     current_page = link_list[start_index:end_index]
-
+    
     try:
         for i in range(page_size):
             text = "{} - {} of {}\n{}".format(
                 page_number,
                 page_size,
                 len(filename),
-                "{}\n".join(current_page)
+                "\n".join(current_page)
                 )
             text += link_str
             
