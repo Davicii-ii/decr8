@@ -4,7 +4,6 @@ import os, sys, json, api
 
 from uuid import uuid4
 
-from api.bot_scdl import *
 from api.variables import *
 from api.deep_link import *
 from api.bot_commands import *
