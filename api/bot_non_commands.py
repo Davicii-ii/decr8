@@ -5,7 +5,7 @@ from api.bot_error import *
 def search(update: Update, context: CallbackContext) -> list[tuple]:
     """Search the user's message.""" 
 
-    global filename, msg_id, link_list, page_number, page_size, start_index, end_index
+    global filename, msg_id, link_list, page_number, page_size, start_index, end_index, enum_link_list
 
     page_size = 10
 
@@ -24,12 +24,11 @@ def search(update: Update, context: CallbackContext) -> list[tuple]:
                     v.get('filename'),
                     re.IGNORECASE
             ):
-                
                 msg_id.append(k)
                 filename.append(v.get('filename'))
                 title.append(v.get('title'))
                 performer.append(v.get('performer'))
-
+                
     except AttributeError as e:
         e
         
@@ -53,15 +52,18 @@ def search(update: Update, context: CallbackContext) -> list[tuple]:
     link = re.search(r"(t\.me\/[a-zA-Z0-9_]{5,32})", update.message.text)
 
     for i in range(len(filename)):
-        link_str = "[{}]({})".format(
+        link_str = "[{}]({})\n".format(
             filename[i],
             dcr8_url+"{}".format(msg_id[i])
         )
         link_list.append(link_str)
 
+    enum_link_list = [
+        "{}. {}".format(i, link_str) for i,
+        link_str in enumerate(link_list, start=1)
+    ]
     # Slice the list to get the items for the current page
-    current_page = link_list[start_index:end_index]
-    
+    current_page = enum_link_list[start_index:end_index]    
     try:
         for i in range(page_size):
             text = "{} - {} of {}\n{}".format(
@@ -69,8 +71,7 @@ def search(update: Update, context: CallbackContext) -> list[tuple]:
                 page_size,
                 len(filename),
                 "\n".join(current_page)
-                )
-            text += link_str
+            )
             
         update.message.reply_text(
             text,
@@ -84,8 +85,8 @@ def search(update: Update, context: CallbackContext) -> list[tuple]:
             )
         else:
             update.message.reply_text("Not found.\n\n{}".format(e))        
-
-    return msg_id, performer, title, filename
+            
+    return msg_id, performer, title, filename, enum_link_list
 
 def search_buttons(update: Update, context: CallbackContext) -> None:
 
@@ -108,14 +109,14 @@ def search_buttons(update: Update, context: CallbackContext) -> None:
         page_number -= 1
         start_index = (page_number - 1) * page_size
         end_index = start_index + page_size
-        prev_page = link_list[start_index:end_index]
+        prev_page = enum_link_list[start_index:end_index]
 
         for i in range(page_size):
             text = "{} - {} of {}\n{}".format(
                 page_number,
                 page_size,
                 len(filename),
-                prev_page
+                "\n".join(prev_page)
             )
         query.edit_message_text(
             text,
@@ -127,7 +128,7 @@ def search_buttons(update: Update, context: CallbackContext) -> None:
         page_number += 1
         start_index = (page_number - 1) * page_size
         end_index = start_index + page_size
-        next_page = link_list[start_index:end_index]
+        next_page = enum_link_list[start_index:end_index]
 
         for i in range(page_size):
             text = "{} - {} of {}\n{}".format(
