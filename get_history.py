@@ -16,30 +16,39 @@ api_hash = "8c64c308e6f0186d495ae1e92a1c228d"
 
 decr8 = -1001280481543
 
+#### create new list/tuple for each attribute
+# forwards=0
+# views=0
+# date=datetime.datetime()
+# performer=''
+# duration=0
+# title=''
+
 try:
     with open(
-            "/home/decr8/decr8/res/decr8_data.json",
+            "/home/decr8/res/decr8_data.json",
             "r",
             encoding="utf-8"
     ) as f:
         existing_data = json.load(f)
-        with Client("history_update", api_id, api_hash) as app:
-            messages = app.get_chat_history(decr8)
-            for msg in messages:
-                if msg.audio and msg.audio.file_name:
-                    if msg.audio.file_name not in existing_data:
-                        existing_data[msg.audio.file_name] = msg.id
-                        with open(
-                                "/home/decr8/decr8/res/decr8_data.json",
-                                "w",
-                                encoding="utf-8"
-                        ) as f:
-                            json.dump(existing_data, f)
-except FileNotFoundError as e:
-    with Client("history_update", api_id, api_hash) as app:
-        logging.info(e, "Getting history.")
+        with open(
+                "/home/decr8/res/decr8_data.json",
+                "w",
+                encoding="utf-8"
+        ) as f:
+            json.dump(existing_data, f)
+    
+except (FileNotFoundError, json.decoder.JSONDecodeError) as e:
+    logging.info(e, "Creating new file...")
+    with Client("get_history", api_id, api_hash) as app:
         d = {
-            msg.audio.file_name: msg.id
+             msg.id: {
+                "performer": msg.audio.performer,
+                "filename": msg.audio.file_name,
+                "duration": msg.audio.duration,
+                "date": str(msg.audio.date),
+                "title": msg.audio.title
+            }
             for msg in (app.get_chat_history(decr8))
             if msg.audio
             if not None
@@ -54,4 +63,3 @@ except FileNotFoundError as e:
             json.dump(d, f)
             logging.info("Done.")
             
-os.system("echo lol | sudo -S systemctl restart decr8")

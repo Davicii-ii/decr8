@@ -101,15 +101,17 @@ def queue(update: Update, context: CallbackContext) -> None:
             ["/queue", "/queue_mix"],
             ["/start"]
         ]
-        
-        update.message.reply_audio(
-            "{}".format(url),
-            parse_mode=ParseMode.MARKDOWN,
-            reply_markup=ReplyKeyboardMarkup(
-                reply_keyboard,
-                one_time_keyboard=True
+        try:
+            update.message.reply_audio(
+                "{}".format(url),
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=ReplyKeyboardMarkup(
+                    reply_keyboard,
+                    one_time_keyboard=True
+                )
             )
-        )
+        except AttributeError as e:
+            continue
         
 def queue_mix(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /next is issued."""
@@ -144,9 +146,9 @@ def queue_mix(update: Update, context: CallbackContext) -> None:
             continue
         
 def run_update(update: Update, context: CallbackContext):
-    command = "python3 update_history.py"
+    command = "python3 get_history.py"
     result = os.popen(command).read()  # Run the command and get the output
-    update.message.reply_text(result)
+    update.message.reply_text(f"{result}\n done.")
     
 def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""

@@ -8,8 +8,8 @@ def deep_linked_level_1(update: Update, context: CallbackContext) -> None:
     bot = context.bot
     try:
         result_id = [
-            v
-            for k, v in d.items()
+            k
+            for k, v in data.items()
         ]
         track_url = "https://t.me/crateofnotsodasbutmusic/{}".format(
             random.choice(result_id)

@@ -17,12 +17,13 @@ def search(update: Update, context: CallbackContext) -> list[tuple]:
     end_index = start_index + page_size
 
     link_list, msg_id, filename, title, performer = [], [], [], [], []
+
     try:
         for k, v in data.items():
-            if re.search(
+            if (re.search(
                     update.message.text,
                     v.get('filename'),
-                    re.IGNORECASE
+                    re.IGNORECASE)
             ):
                 msg_id.append(k)
                 filename.append(v.get('filename'))
@@ -151,14 +152,13 @@ def inlinequery(update: Update, context: CallbackContext) -> None:
     results = []
 
     for k, v in data.items():
-        if re.search(query, k, re.IGNORECASE):
+        if re.search(query, v.get("filename"), re.IGNORECASE):
             results.append(
                 InlineQueryResultAudio(
                     id=uuid4(),
-                    audio_url="{}{}".format(dcr8_url, v),
-                    title="{}".format(k)
+                    audio_url="{}{}".format(dcr8_url, k),
+                    title="{}".format(v.get("title"))
                 ),
-            )
-        
+            )        
     update.inline_query.answer(results, auto_pagination=True)
 
