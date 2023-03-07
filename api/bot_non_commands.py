@@ -2,7 +2,10 @@ from api.imports import *
 from api.variables import *
 from api.bot_error import *
 
-def search(update: Update, context: CallbackContext) -> list[tuple]:
+async def search(
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE
+) -> list[tuple]:
     """Search the user's message.""" 
 
     global filename, msg_id, link_list, page_number, page_size, start_index, end_index, enum_link_list
@@ -74,22 +77,27 @@ def search(update: Update, context: CallbackContext) -> list[tuple]:
                 "\n".join(current_page)
             )
             
-        update.message.reply_text(
+        await update.message.reply_text(
             text,
             reply_markup=reply_markup,
             parse_mode=ParseMode.MARKDOWN
         )
     except (BadRequest, IndexError, AttributeError) as e:
         if link:
-            update.message.reply_text(
+            await update.message.reply_text(
                 "use this bot to download songs: \nt.me/decr8test_bot"
             )
         else:
-            update.message.reply_text("Not found.\n\n{}".format(e))        
-            
+            await update.message.reply_text(
+                "Not found.\n\n{}".format(e)
+            )        
+        
     return msg_id, performer, title, filename, enum_link_list
 
-def search_buttons(update: Update, context: CallbackContext) -> None:
+async def search_buttons(
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE
+) -> None:
 
     global filename, msg_id, link_list, page_number, page_size, start_index, end_index
     
@@ -119,7 +127,7 @@ def search_buttons(update: Update, context: CallbackContext) -> None:
                 len(filename),
                 "\n".join(prev_page)
             )
-        query.edit_message_text(
+        await query.edit_message_text(
             text,
             reply_markup=reply_markup,
             parse_mode=ParseMode.MARKDOWN
@@ -140,13 +148,16 @@ def search_buttons(update: Update, context: CallbackContext) -> None:
             )
             # text += link_str
             
-        query.edit_message_text(
+        await query.edit_message_text(
             text,
             reply_markup=reply_markup,
             parse_mode=ParseMode.MARKDOWN
         )
             
-def inlinequery(update: Update, context: CallbackContext) -> None:
+async def inlinequery(
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Handle the inline query."""
     query = update.inline_query.query
     results = []
@@ -160,5 +171,14 @@ def inlinequery(update: Update, context: CallbackContext) -> None:
                     title="{}".format(v.get("title"))
                 ),
             )        
-    update.inline_query.answer(results, auto_pagination=True)
+    await update.inline_query.answer(results, auto_pagination=True)
 
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Cancels and ends the conversation."""
+    user = update.message.from_user
+    logger.info("User %s canceled the conversation.", user.first_name)
+    await update.message.reply_text(
+        "Bye!", reply_markup=ReplyKeyboardRemove()
+    )
+
+    return ConversationHandler.END

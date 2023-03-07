@@ -27,12 +27,9 @@ STAGE1, STAGE2, STAGE3, STAGE4 = range(4)
 
 app = Client("decr8_g-host", api_id=api_id, api_hash=api_hash)
 
-updater = Updater(
-    "1266125805:AAFnUPiqc0LiHPWJNlOp2XhfSGsqtu_cEbA", use_context=True
-)
-
-# Get the dispatcher to register handlers
-dp = updater.dispatcher
+application = Application.builder().token(
+    "1266125805:AAFnUPiqc0LiHPWJNlOp2XhfSGsqtu_cEbA"
+).build()
 
 def process_data(file_path, logger):
     with open(file_path, "r+", encoding="utf-8") as f:

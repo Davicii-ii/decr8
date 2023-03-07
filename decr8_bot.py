@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os, sys, json, api
+import os, sys, json
 
 from uuid import uuid4
 
@@ -23,12 +23,11 @@ def main():
     # Post version 12 this will no longer be necessary
 
     # Start the Bot
-    updater.start_polling()
-    
     # Block until the user presses Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
-    updater.idle()    
+    # run_polling() is non-blocking and will stop the bot gracefully.
+    application.run_polling()
+       
         
 if __name__ == "__main__":
     sys.path.append("/home/decr8/decr8/api")

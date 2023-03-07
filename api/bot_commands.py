@@ -4,7 +4,7 @@ from api.bot_error import *
 
 COUNT = 0
 
-def start(update: Update, context: CallbackContext) -> None:
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Start bot"""
 
     global COUNT
@@ -21,25 +21,24 @@ def start(update: Update, context: CallbackContext) -> None:
     bot = context.bot
     
     url = helpers.create_deep_linked_url(
-        bot.get_me().username,
+        bot.username,
         DECR8,
         group=True
         )
     
     text = ("👺" "{} items found".format(len(data)))
     
-    update.message.reply_text(
+    await update.message.reply_text(
         text,
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard,
-            parse_mode=ParseMode.MARKDOWN,
             one_time_keyboard=True
         )
     )
     
     return STAGE1
 
-def add(update: Update, context: CallbackContext) -> None:
+async def add(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     global COUNT
     
@@ -50,13 +49,13 @@ def add(update: Update, context: CallbackContext) -> None:
 
     COUNT += 1
 
-    update.message.reply_text(
+    await update.message.reply_text(
         "queue {} song(s)".format(COUNT),
         reply_markup=ReplyKeyboardMarkup(reply_keyboard),
         parse_mode=ParseMode.MARKDOWN
     )
 
-def sub(update: Update, context: CallbackContext) -> None:
+async def sub(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     global COUNT
 
@@ -69,20 +68,20 @@ def sub(update: Update, context: CallbackContext) -> None:
     ]
 
     if COUNT < 1:
-        update.message.reply_text(
+        await update.message.reply_text(
             "queue cant be < {}. /add instead".format(COUNT),
             reply_markup=ReplyKeyboardMarkup(help_keyboard),
             parse_mode=ParseMode.MARKDOWN
         )
     else:
         COUNT -= 1
-        update.message.reply_text(
+        await update.message.reply_text(
             "queue {} song(s)\nuse /add for more".format(COUNT),
             reply_markup=ReplyKeyboardMarkup(reply_keyboard),
             parse_mode=ParseMode.MARKDOWN
         )
 
-def queue(update: Update, context: CallbackContext) -> None:
+async def queue(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /next is issued."""
 
     global COUNT
@@ -102,7 +101,7 @@ def queue(update: Update, context: CallbackContext) -> None:
             ["/start"]
         ]
         try:
-            update.message.reply_audio(
+            await update.message.reply_audio(
                 "{}".format(url),
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=ReplyKeyboardMarkup(
@@ -113,7 +112,10 @@ def queue(update: Update, context: CallbackContext) -> None:
         except AttributeError as e:
             continue
         
-def queue_mix(update: Update, context: CallbackContext) -> None:
+async def queue_mix(
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Send a message when the command /next is issued."""
     
     global COUNT
@@ -134,7 +136,7 @@ def queue_mix(update: Update, context: CallbackContext) -> None:
             ["/start"]
         ]
         try:
-            update.message.reply_audio(
+            await update.message.reply_audio(
                 "{}".format(url),
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=ReplyKeyboardMarkup(
@@ -145,12 +147,15 @@ def queue_mix(update: Update, context: CallbackContext) -> None:
         except BadRequest as e:
             continue
         
-def run_update(update: Update, context: CallbackContext):
+async def run_update(update: Update, context: ContextTypes.DEFAULT_TYPE):
     command = "python3 get_history.py"
     result = os.popen(command).read()  # Run the command and get the output
-    update.message.reply_text(f"{result}\n done.")
+    await update.message.reply_text(f"{result}\n done.")
     
-def help_command(update: Update, context: CallbackContext) -> None:
+async def help_command(
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Send a message when the command /help is issued."""
-    update.message.reply_text("/next Add to playlist.")
+    await update.message.reply_text("/next Add to playlist.")
 

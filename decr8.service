@@ -3,8 +3,8 @@ Description=decr8_bot
 
 [Service]
 User=root
-WorkingDirectory=/home/ayuko/decr8
-ExecStart=python3 /home/ayuko/decr8/decr8_bot.py
+WorkingDirectory=/home/decr8/decr8
+ExecStart=python3 /home/decr8/decr8/decr8_bot.py
 Restart=always
 
 [Install]

@@ -6,30 +6,29 @@ from api.bot_non_commands import *
 from api.bot_error import *
 
 # Register a deep-linking handler
-dp.add_handler(
+application.add_handler(
     CommandHandler(
         "start",
         deep_linked_level_1,
-        Filters.regex(DECR8)
+        filters.Regex(DECR8)
     )
 )
 
 # This one works with a textual link instead of an URL
-dp.add_handler(
+application.add_handler(
     CommandHandler(
         "start",
         deep_linked_level_2,
-        Filters.regex(SO_COOL)
+        filters.Regex(SO_COOL)
     )
 )
 
 # We can also pass on the deep-linking payload
-dp.add_handler(
+application.add_handler(
     CommandHandler(
         "start",
         deep_linked_level_3,
-        Filters.regex(USING_ENTITIES),
-        pass_args=True
+        filters.Regex(USING_ENTITIES)
     )
 )
 
@@ -37,36 +36,36 @@ dp.add_handler(
 conv_handler = ConversationHandler(
     entry_points=[CommandHandler('start', start)],
     states={
-        STAGE1: [MessageHandler(Filters.regex('^(/start|/queue|/cancel)$'), stage1)],
+        STAGE1: [MessageHandler(filters.Regex('^(/start|/queue|/cancel)$'), STAGE1)],
         STAGE3: [
-            MessageHandler(Filters.location, stage3),
-            CommandHandler('skip', stage3),
+            MessageHandler(filters._Location, STAGE3),
+            CommandHandler('skip', STAGE3),
         ],
-        STAGE4: [MessageHandler(Filters.text & ~Filters.command, stage4)],
+        STAGE4: [MessageHandler(filters.Text, STAGE4)],
     },
-    fallbacks=[CommandHandler('cancel', cancel)],
+    fallbacks=[CommandHandler("cancel", cancel)],
 )
 
 # on different commands - answer in Telegram
-dp.add_handler(CommandHandler("start", start))
-dp.add_handler(CommandHandler("queue", queue))
-dp.add_handler(CommandHandler("queue_mix", queue_mix))
-dp.add_handler(CommandHandler("add", add))
-dp.add_handler(CommandHandler("sub", sub))
-dp.add_handler(CommandHandler("update", run_update))
+application.add_handler(CommandHandler("start", start))
+application.add_handler(CommandHandler("queue", queue))
+application.add_handler(CommandHandler("queue_mix", queue_mix))
+application.add_handler(CommandHandler("add", add))
+application.add_handler(CommandHandler("sub", sub))
+application.add_handler(CommandHandler("update", run_update))
 
-dp.add_handler(CommandHandler("help", help_command))
-dp.add_handler(CommandHandler("bad_command", bad_command))
+application.add_handler(CommandHandler("help", help_command))
+application.add_handler(CommandHandler("bad_command", bad_command))
 
 # on noncommand i.e message - echo the message on Telegram
-dp.add_handler(InlineQueryHandler(inlinequery))
-dp.add_handler(
+application.add_handler(InlineQueryHandler(inlinequery))
+application.add_handler(
     MessageHandler(
-        Filters.text & ~Filters.command,
+        filters.TEXT & ~filters.COMMAND,
         search,
     )
 )
 
-dp.add_handler(CallbackQueryHandler(search_buttons))
-dp.add_handler(conv_handler)
-dp.add_error_handler(error_handler)
+application.add_handler(CallbackQueryHandler(search_buttons))
+application.add_handler(conv_handler)
+application.add_error_handler(error_handler)
