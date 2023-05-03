@@ -5,7 +5,7 @@ filename='/home/decr8/decr8/links.txt'
 
 while :; read line; do
     # reading each line
-    scdl -l $line -f -c --path="/home/decr8/music"
+    scdl -l $line -f -c --path="/home/decr8/decr8/decr8-player/src/music" --original-art
     shuf $filename -o $filename
 done < $filename
 #for i in  {1..10}
